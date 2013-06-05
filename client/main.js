@@ -92,26 +92,22 @@ for (var i = 0, n = args.length; i < n; ++i)
 	if (args[i] === '--add-host') // If the argument is --add-host
 	{
 		console.log('command: ' +args[i] + ' argument: ' +args[i+1]);
-		add_host(args[i+1]);
-		i++;
+		add_host(args[++i]);
 	}
 	else if (args[i] === '--rm-host')// If the argument is --rm-host
 	{
 		console.log('command: ' +args[i] + ' argument: ' +args[i+1]);
-		rm_host(args[i+1]);
-		i++;
+		rm_host(args[++i]);
 	}
 	else if(args[i] === '--listen-host')// If the argument is --listen-host
 	{
 		console.log('command: ' +args[i] + ' argument: ' +args[i+1]);
-		listen_host(args[i+1]);
-		i++;
+		listen_host(args[++i]);
 	}
 	else if(args[i] === '--listen-all-hosts')// If the argument is --listen-all-hosts
 	{
 		console.log('command: ' +args[i]);
 		listen_all_hosts();
-		i++;
 	}
 	else // If one of all arguments doesn't exist.
 	{
