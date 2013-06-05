@@ -1,4 +1,5 @@
 #!/usr/bin/nodejs
+
 var http = require('http');
 var EventEmitter = require('events').EventEmitter;
 
@@ -10,25 +11,26 @@ Array.prototype.unset = function(val){
 	}
 }
 
-var host = new Array();
+var hosts = new Array();
 var signal = new EventEmitter();
 
 ///////////////////////////////////////
-server = http.createServer(function(req, res)
-{
+server = http.createServer(function(req, res) {
 	//On recupère la requete du client qui contient des informations en JSONRPC
 	req.on('data', function(data) {
 	//On partitionne l'information envoyer après avoir transformer en string le buffer reçu
 	data = JSON.parse(data.toString());
 	
-		if (data.method=='--add-host') //Si dans le Data reçu, la méthode envoyé est --add-host
+	////////////////////////////////////////
+
+	if (data.method=='add_host') //Si dans le Data reçu, la méthode envoyé est --add-host
 		{
-			if (host.indexOf(data.params[0])===-1) // Si l'host n'existe pas dans notre tableau
+			if (hosts.indexOf(data.params[0])===-1) // Si l'host n'existe pas dans notre tableau
 			{
-				host.push(data.params[0]); //On ajoute l'host dans le tableau des host
+				hosts.push(data.params[0]); //On ajoute l'host dans le tableau des hosts
 				console.log('Host : ' + data.params[0] + ' has been added');
 				
-				signal.emit('--add-host-', data.params[0]);
+				signal.emit('add_host', data.params[0]); // Un evènement add_host à été fait
 					
 				res.end( // On retourne une réponse positive au client
 					JSON.stringify({
@@ -50,9 +52,11 @@ server = http.createServer(function(req, res)
 			}
 		}
 
-		else if(data.method=='--rm-host') //Si dans le Data reçu, la méthode envoyé est --rm-host
+	////////////////////////////////////////
+
+	else if(data.method=='rm_host') //Si dans le Data reçu, la méthode envoyé est --rm-host
 		{
-			if (host.indexOf(data.params[0])===-1) // Si l'host n'existe pas dans notre tableau
+			if (hosts.indexOf(data.params[0])===-1) // Si l'host n'existe pas dans notre tableau
 			{
 				res.end( // On retourne une réponse négative au client
 					JSON.stringify({
@@ -64,8 +68,11 @@ server = http.createServer(function(req, res)
 			}
 			else // Si l'host existe déja dans notre tableau
 			{
-				host.unset(data.params[0]);
+				hosts.unset(data.params[0]); // On retire l'host dans le tableau des hosts
 				console.log('Host :' + data.params[0] + ' has been deleted');
+				
+				signal.emit('rm_host', data.params[0]); // Un evènement
+							
 				res.end( // On retourne une réponse positive au client
 					JSON.stringify({
 						'jsonrpc': '2.0',
@@ -76,10 +83,75 @@ server = http.createServer(function(req, res)
 			}
 		}
 		
-		else if(data.method=='--listen-host')
+	////////////////////////////////////////
+	
+		else if(data.method=='listen_host')
 		{
+			var add_host_listener = function (host) {
+				if (data.params[0]==host)
+				{
+					res.end(
+						JSON.stringify({
+							'jsonrpc': '2.0',
+							'result': host,
+							'id': data.id,
+						})
+					);
+					signal.removeListener('add-host', add_host_listener);
+					signal.removeListener('rm-host', rm_host_listener);
+				}
+			};
+			
+			var rm_host_listener = function (host) {
+				if (data.params[0]==host)
+				{
+					res.end(
+						JSON.stringify({
+							'jsonrpc': '2.0',
+							'result': host,
+							'id': data.id,
+						})
+					);
+					signal.removeListener('add_host', add_host_listener);
+					signal.removeListener('rm_host', rm_host_listener);
+				}	
+			};
+			
+			signal.on('add_host', add_host_listener);
+			signal.on('rm_host', rm_host_listener);
+		}	
 		
-		
+	////////////////////////////////////////
+	
+		else if(data.method=='listen_all_host')
+		{
+			var add_host_listener = function (host) {
+					res.end(
+						JSON.stringify({
+							'jsonrpc': '2.0',
+							'result': ['--add-host', host],
+							'id': data.id,
+						})
+					);
+					signal.removeListener('add-host', add_host_listener);
+					signal.removeListener('rm-host', rm_host_listener);
+			};
+			
+			var rm_host_listener = function (host) {
+					res.end(
+						JSON.stringify({
+							'jsonrpc': '2.0',
+							'result': ['--rm-host', host],
+							'id': data.id,
+						})
+					);
+					signal.removeListener('add_host', add_host_listener);
+					signal.removeListener('rm_host', rm_host_listener);
+			};
+			
+			signal.on('add_host', add_host_listener);
+			signal.on('rm_host', rm_host_listener);
+		}	
 		
 	});
 });

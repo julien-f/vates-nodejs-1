@@ -40,7 +40,7 @@ var req = http.request(option,function(resp)
 
 function add_host(label)
 {
-json_call('--add-host', [label], function(result) {
+json_call('add_host', [label], function(result) {
 		if (result)
 		{
 			console.log('The host has been added.');
@@ -54,27 +54,30 @@ json_call('--add-host', [label], function(result) {
 
 function rm_host(label)
 {
-	json_call('--rm-host', [label], function(result) {
+	json_call('rm_host', [label], function(result) {
 		if (result)
 		{
 			console.log('The host has been deleted.');
 		}
 		else
 		{
-			console.log('Error, the host name doesn\'y exist');
+			console.log('Error, the host name doesn\'t exist');
 		}
 	});
 }
 
 function listen_host(label)
 {
-	json_call('--listen-host', [label], function(result){
-	
+	json_call('listen_host', [label], function(result){
+			console.log('A new command : ' + result + ' was done for : ' + label);
+	});
 }
-
+	
 function listen_all_hosts()
 {
-
+	json_call('listen_all_host', [0], function(result){
+			console.log('A new command : ' + result[0] + ' was done for : ' + result[1]);
+	});
 }
 
 ///////////////////////////////////////
@@ -110,8 +113,8 @@ for (var i = 0, n = args.length; i < n; ++i)
 	}
 	else if(args[i]=='--listen-all-hosts')// If the argument is --listen-all-hosts
 	{
-		console.log('command : ' +args[i] + ' argument : ' +args[i+1]);
-		listen_all_hosts(args[i+1]);
+		console.log('command : ' +args[i]);
+		listen_all_hosts();
 		i++;
 	}
 	else // If one of all arguments doesn't existe
