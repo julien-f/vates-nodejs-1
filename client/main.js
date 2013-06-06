@@ -65,7 +65,7 @@ function rm_host(label)
 function listen_host(label)
 {
 	json_call('listen_host', [label], function(result) {
-		console.log('A new command: ' + result + ' was done for: ' + label);
+		console.log('A new command: ' + result[0] + ' was done for: ' + label);
 	});
 }
 

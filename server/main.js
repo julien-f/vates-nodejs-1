@@ -70,7 +70,7 @@ http.createServer(function(req, res) {
 			else // Si l'host existe déja dans notre tableau
 			{
 				hosts.unset(data.params[0]); // On retire l'host dans le tableau des hosts
-				console.log('Host:' + data.params[0] + ' has been deleted');
+				console.log('Host: ' + data.params[0] + ' has been deleted');
 
 				signal.emit('rm_host', data.params[0]); // Un evènement
 
@@ -94,7 +94,7 @@ http.createServer(function(req, res) {
 					res.end(
 						JSON.stringify({
 							'jsonrpc': '2.0',
-							'result': host,
+							'result': ['--add-host', host],
 							'id': data.id,
 						})
 					);
@@ -109,7 +109,7 @@ http.createServer(function(req, res) {
 					res.end(
 						JSON.stringify({
 							'jsonrpc': '2.0',
-							'result': host,
+							'result': ['--rm-host', host],
 							'id': data.id,
 						})
 					);
